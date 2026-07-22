@@ -31,7 +31,7 @@ export default async function EditProfilePage({
 
   return (
     <main className="min-h-screen px-6 py-16">
-      <div className="mx-auto max-w-2xl">
+      <div className="mx-auto max-w-5xl">
         <span className="font-[family-name:var(--font-data)] text-xs uppercase tracking-[0.2em] text-[var(--color-accent-bright)]">
           Editing
         </span>
