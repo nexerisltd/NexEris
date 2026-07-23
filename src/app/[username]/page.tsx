@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getCurrentUser } from '@/lib/auth'
 import { whatsappUrl, facebookUrl, instagramUrl } from '@/lib/social-links'
 import { LikeButton } from '@/components/profile/LikeButton'
+import { AvatarLightbox } from '@/components/profile/AvatarLightbox'
 
 export async function generateMetadata({
   params,
@@ -120,20 +121,22 @@ export default async function ProfilePage({
 
       <div className="mx-auto -mt-16 max-w-3xl px-6">
         <div className="flex items-end justify-between">
-          <div className="relative h-32 w-32 overflow-hidden rounded-full ring-4 ring-[var(--color-bg)]">
-            {profile.avatar_url ? (
-              <Image
-                src={profile.avatar_url}
-                alt={profile.full_name}
-                fill
-                className="object-cover"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center bg-[var(--color-surface-hover)] font-[family-name:var(--font-display)] text-2xl font-semibold text-[var(--color-text)]">
-                {initials}
-              </div>
-            )}
-          </div>
+          <AvatarLightbox src={profile.avatar_url} alt={profile.full_name}>
+            <div className="relative h-32 w-32 overflow-hidden rounded-full ring-4 ring-[var(--color-bg)]">
+              {profile.avatar_url ? (
+                <Image
+                  src={profile.avatar_url}
+                  alt={profile.full_name}
+                  fill
+                  className="object-cover"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-[var(--color-surface-hover)] font-[family-name:var(--font-display)] text-2xl font-semibold text-[var(--color-text)]">
+                  {initials}
+                </div>
+              )}
+            </div>
+          </AvatarLightbox>
 
           {isOwnerOrAdmin && (
             <Link
