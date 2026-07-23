@@ -6,11 +6,13 @@ import { ScrollProgress } from '@/components/ui/ScrollProgress'
 import { CustomCursor } from '@/components/ui/CustomCursor'
 import { ThemeScript } from '@/components/ui/ThemeScript'
 
+
 const sora = Sora({
   subsets: ['latin'],
   variable: '--font-sora',
   weight: ['400', '600', '700'],
 })
+
 
 const inter = Inter({
   subsets: ['latin'],
