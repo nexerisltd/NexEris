@@ -1,4 +1,9 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## NexAurasTM
+
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://github.com/nexappog/NexAuras-Android/blob/main/assets/Cover.png" />
+</div>
 
 ## Getting Started
 
