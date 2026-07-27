@@ -2,7 +2,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 ## NexAurasTM
 
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/nexappog/NexAuras-Android/blob/main/assets/Cover.png" />
+<img width="1200" height="475" alt="GHBanner" src="https://github.com/nexerisltd/NexAurasTM/blob/main/assets/cover.png" />
 </div>
 
 ## Getting Started
