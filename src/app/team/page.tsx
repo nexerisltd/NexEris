@@ -2,8 +2,8 @@ import { TeamSection } from '@/components/homepage/TeamSection'
 import { getAllProfiles } from '@/lib/data/profiles'
 
 export const metadata = {
-  title: 'Team — NexAuras',
-  description: 'Browse every member of the NexAuras team.',
+  title: 'Team — NexEris',
+  description: 'Browse every member of the NexEris team.',
 }
 
 export default async function TeamPage() {

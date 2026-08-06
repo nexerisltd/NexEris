@@ -20,7 +20,7 @@ export function About() {
             One directory, every department.
           </h2>
           <p className="mt-4 max-w-2xl text-[var(--color-text-muted)]">
-            NexAuras brings every team member into a single, living directory. Profiles are self-maintained by the people in them, so what you see here is always current — not an HR spreadsheet frozen in time.
+            NexEris brings every team member into a single, living directory. Profiles are self-maintained by the people in them, so what you see here is always current — not an HR spreadsheet frozen in time.
           </p>
         </div>
         <div className="h-px w-24 self-center bg-[var(--color-accent)]/40 sm:h-24 sm:w-px" />

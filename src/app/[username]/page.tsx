@@ -7,6 +7,7 @@ import { getCurrentUser } from '@/lib/auth'
 import { whatsappUrl, facebookUrl, instagramUrl } from '@/lib/social-links'
 import { LikeButton } from '@/components/profile/LikeButton'
 import { AvatarLightbox } from '@/components/profile/AvatarLightbox'
+import { ExpBar } from '@/components/profile/ExpBar'
 
 export async function generateMetadata({
   params,
@@ -23,12 +24,12 @@ export async function generateMetadata({
     .maybeSingle()
 
   if (!profile) {
-    return { title: 'Profile not found — NexAuras' }
+    return { title: 'Profile not found — NexEris' }
   }
 
   return {
-    title: `${profile.full_name} — NexAuras`,
-    description: profile.bio ?? `${profile.full_name}'s profile on the NexAuras team directory.`,
+    title: `${profile.full_name} — NexEris`,
+    description: profile.bio ?? `${profile.full_name}'s profile on the NexEris team directory.`,
   }
 }
 
@@ -174,6 +175,8 @@ export default async function ProfilePage({
               </span>
             )}
           </div>
+
+          <ExpBar exp={profile.exp_points ?? 0} seed={profile.id} />
 
           {profile.bio && (
             <p className="mt-6 max-w-2xl text-[var(--color-text)]">{profile.bio}</p>

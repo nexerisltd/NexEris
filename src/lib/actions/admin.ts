@@ -51,6 +51,41 @@ export async function changeProfileRole(profileId: string, role: 'member' | 'adm
   return { success: true }
 }
 
+export async function adjustExpPoints(profileId: string, delta: number, username: string) {
+  await requireAdmin()
+
+  if (!Number.isFinite(delta) || delta === 0) {
+    return { success: false, error: 'Enter a non-zero amount.' }
+  }
+
+  const supabase = await createClient()
+
+  const { data: existing, error: fetchError } = await supabase
+    .from('profiles')
+    .select('exp_points')
+    .eq('id', profileId)
+    .single()
+
+  if (fetchError || !existing) {
+    return { success: false, error: 'Profile not found.' }
+  }
+
+  const nextTotal = Math.max(0, Math.round((existing.exp_points ?? 0) + delta))
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ exp_points: nextTotal })
+    .eq('id', profileId)
+
+  if (error) return { success: false, error: error.message }
+
+  revalidatePath(`/${username}`)
+  revalidatePath(`/${username}/edit`)
+  revalidatePath('/admin/members')
+
+  return { success: true, total: nextTotal }
+}
+
 export async function deleteProfile(profileId: string) {
   await requireAdmin()
   const supabase = await createClient()

@@ -24,7 +24,7 @@ export default async function LoginPage({
 
       <div className="glass animate-fade-in-up w-full max-w-sm rounded-2xl p-8 shadow-2xl">
         <span className="font-[family-name:var(--font-data)] text-xs uppercase tracking-[0.25em] text-[var(--color-accent-bright)]">
-          NexAuras
+          NexEris
         </span>
         <h1 className="mt-3 font-[family-name:var(--font-display)] text-2xl font-semibold text-[var(--color-text)]">
           Sign in to your account

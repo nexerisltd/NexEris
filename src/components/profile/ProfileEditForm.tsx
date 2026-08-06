@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { updateProfile, checkUsernameAvailable } from '@/lib/actions/profile'
+import { adjustExpPoints } from '@/lib/actions/admin'
 import { CoverPositionEditor } from './CoverPositionEditor'
 import { Toast } from '@/components/ui/Toast'
 import type { Profile } from '@/lib/types'
@@ -35,6 +36,10 @@ export function ProfileEditForm({ profile, isAdmin }: { profile: Profile; isAdmi
     null
   )
   const [copied, setCopied] = useState(false)
+
+  const [expTotal, setExpTotal] = useState(profile.exp_points ?? 0)
+  const [expAmount, setExpAmount] = useState('10')
+  const [isExpPending, startExpTransition] = useTransition()
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -94,6 +99,27 @@ export function ProfileEditForm({ profile, isAdmin }: { profile: Profile; isAdmi
     navigator.clipboard.writeText(profile.nex_id)
     setCopied(true)
     setTimeout(() => setCopied(false), 1500)
+  }
+
+  function handleExpAdjust(sign: 1 | -1) {
+    const amount = Math.abs(Math.round(Number(expAmount)))
+    if (!amount) {
+      setMessage({ type: 'error', text: 'Enter a valid EXP amount.' })
+      return
+    }
+
+    startExpTransition(async () => {
+      const result = await adjustExpPoints(profile.id, sign * amount, profile.username)
+      if (result.success && typeof result.total === 'number') {
+        setExpTotal(result.total)
+        setMessage({
+          type: 'success',
+          text: `${sign === 1 ? 'Added' : 'Removed'} ${amount} EXP.`,
+        })
+      } else {
+        setMessage({ type: 'error', text: result.error ?? 'Could not update EXP.' })
+      }
+    })
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -227,6 +253,48 @@ export function ProfileEditForm({ profile, isAdmin }: { profile: Profile; isAdmi
             &quot;Nex&quot; prefix.
           </p>
         </div>
+
+        {isAdmin && (
+          <div>
+            <label className="mb-1.5 block text-xs text-[var(--color-text-muted)]">
+              EXP Points (admin only)
+            </label>
+            <div className="input flex flex-wrap items-center justify-between gap-3">
+              <span className="font-[family-name:var(--font-data)] text-[var(--color-text)]">
+                {expTotal.toLocaleString()} EXP
+              </span>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min={1}
+                  value={expAmount}
+                  onChange={(e) => setExpAmount(e.target.value)}
+                  className="w-20 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1 text-xs text-[var(--color-text)]"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleExpAdjust(1)}
+                  disabled={isExpPending}
+                  className="rounded-lg bg-[var(--color-accent)] px-3 py-1 text-xs font-medium text-white hover:bg-[var(--color-accent-bright)] disabled:opacity-50"
+                >
+                  + Add
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleExpAdjust(-1)}
+                  disabled={isExpPending}
+                  className="rounded-lg border border-[var(--color-border)] px-3 py-1 text-xs font-medium text-[var(--color-text)] hover:border-red-400/50 hover:text-red-400 disabled:opacity-50"
+                >
+                  − Remove
+                </button>
+              </div>
+            </div>
+            <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+              Adjusts this member&apos;s EXP immediately — separate from &quot;Save changes&quot;
+              below. Shown on their public profile as a progress bar.
+            </p>
+          </div>
+        )}
 
         <div className="grid grid-cols-2 gap-4">
           <Field label="Pronouns">

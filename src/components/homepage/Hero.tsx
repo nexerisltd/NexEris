@@ -23,7 +23,7 @@ export function Hero({ isSignedIn, username }: HeroProps) {
         className="mx-auto max-w-3xl text-center"
       >
         <span className="font-[family-name:var(--font-data)] text-xs uppercase tracking-[0.25em] text-[var(--color-accent-bright)]">
-          NexAuras Directory
+          NexEris Directory
         </span>
 
         <p className="mt-4 font-[family-name:var(--font-data)] text-base text-[var(--color-text-muted)] sm:text-lg">
@@ -35,7 +35,7 @@ export function Hero({ isSignedIn, username }: HeroProps) {
         </p>
 
         <h1 className="mt-6 font-[family-name:var(--font-display)] text-3xl font-semibold leading-[1.15] text-[var(--color-text)] sm:text-5xl">
-          Every person behind NexAuras,
+          Every person behind NexEris,
           <br className="hidden sm:block" /> verified and in one place.
         </h1>
         <p className="mx-auto mt-6 max-w-xl text-sm text-[var(--color-text-muted)] sm:text-lg">

@@ -1,0 +1,60 @@
+.track {
+  position: relative;
+  height: 8px;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 999px;
+}
+
+.fill {
+  position: absolute;
+  inset: 0;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-bright));
+  /* Illusional progress: the bar perpetually creeps forward and softly
+     resets, so it always reads as "advancing" without ever reflecting
+     a real completion state. The EXP number above is the only real value. */
+  animation: exp-creep 7s cubic-bezier(0.35, 0, 0.25, 1) infinite;
+}
+
+.shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.35) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: exp-shimmer 2.4s linear infinite;
+  mix-blend-mode: overlay;
+}
+
+@keyframes exp-creep {
+  0% {
+    width: 6%;
+    opacity: 0.85;
+  }
+  85% {
+    width: 92%;
+    opacity: 1;
+  }
+  92% {
+    opacity: 0.4;
+  }
+  100% {
+    width: 6%;
+    opacity: 0.85;
+  }
+}
+
+@keyframes exp-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

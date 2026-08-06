@@ -25,8 +25,8 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'NexAuras Team Directory',
-  description: "Meet the people behind NexAuras — verified, current, in one place.",
+  title: 'NexEris Team Directory',
+  description: "Meet the people behind NexEris — verified, current, in one place.",
 }
 
 export default function RootLayout({

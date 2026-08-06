@@ -18,6 +18,7 @@ export interface Profile {
   facebook: string | null
   instagram: string | null
   role: 'member' | 'admin'
+  exp_points: number
   created_at: string
   updated_at: string
 }
