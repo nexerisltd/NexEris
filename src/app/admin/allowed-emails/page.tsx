@@ -1,9 +1,13 @@
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
+import { requireStaffPage } from '@/lib/permissions'
+import { isSuperAdmin } from '@/lib/roles'
 import { AllowedEmailsTable } from '@/components/admin/AllowedEmailsTable'
 import { BulkImportEmails } from '@/components/admin/BulkImportEmails'
 
 export default async function AdminAllowedEmailsPage() {
-  const supabase = await createClient()
+  const currentUser = await requireStaffPage('/admin/allowed-emails')
+  const canAssignRoles = isSuperAdmin(currentUser.role)
+  const supabase = createServiceClient()
   const { data: emails } = await supabase
     .from('allowed_members')
     .select('*')
@@ -15,9 +19,9 @@ export default async function AdminAllowedEmailsPage() {
         <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold text-[var(--color-text)]">
           Allowed Emails
         </h1>
-        <BulkImportEmails />
+        <BulkImportEmails canAssignRoles={canAssignRoles} />
       </div>
-      <AllowedEmailsTable emails={emails ?? []} />
+      <AllowedEmailsTable emails={emails ?? []} isSuperAdmin={canAssignRoles} />
     </div>
   )
 }

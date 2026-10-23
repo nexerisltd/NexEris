@@ -2,16 +2,23 @@
 
 import { useState, useTransition } from 'react'
 import { addAllowedEmail, removeAllowedEmail, updateAllowedEmailRole } from '@/lib/actions/admin'
+import { ROLE_LABELS, type ProfileRole } from '@/lib/roles'
 
 interface AllowedEmail {
   id: string
   email: string
-  role: 'member' | 'admin'
+  role: ProfileRole
 }
 
-export function AllowedEmailsTable({ emails }: { emails: AllowedEmail[] }) {
+export function AllowedEmailsTable({
+  emails,
+  isSuperAdmin,
+}: {
+  emails: AllowedEmail[]
+  isSuperAdmin: boolean
+}) {
   const [newEmail, setNewEmail] = useState('')
-  const [newRole, setNewRole] = useState<'member' | 'admin'>('member')
+  const [newRole, setNewRole] = useState<ProfileRole>('member')
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
@@ -28,7 +35,7 @@ export function AllowedEmailsTable({ emails }: { emails: AllowedEmail[] }) {
     })
   }
 
-  function handleRoleChange(id: string, role: 'member' | 'admin') {
+  function handleRoleChange(id: string, role: ProfileRole) {
     startTransition(async () => {
       await updateAllowedEmailRole(id, role)
     })
@@ -55,18 +62,23 @@ export function AllowedEmailsTable({ emails }: { emails: AllowedEmail[] }) {
             placeholder="name@company.com"
           />
         </div>
-        <div>
-          <label className="mb-1.5 block text-xs text-[var(--color-text-muted)]">Role</label>
-          <select
-            value={newRole}
-            onChange={(e) => setNewRole(e.target.value as 'member' | 'admin')}
-            style={{ colorScheme: 'dark' }}
-            className="input"
-                >
-            <option value="member">Member</option>
-            <option value="admin">Admin</option>
-          </select>
-        </div>
+        {isSuperAdmin ? (
+          <div>
+            <label className="mb-1.5 block text-xs text-[var(--color-text-muted)]">Role</label>
+            <select
+              value={newRole}
+              onChange={(e) => setNewRole(e.target.value as ProfileRole)}
+              style={{ colorScheme: 'dark' }}
+              className="input"
+            >
+              <option value="member">Member</option>
+              <option value="admin">Admin</option>
+              <option value="super_admin">Super Admin</option>
+            </select>
+          </div>
+        ) : (
+          <p className="pb-2.5 text-xs text-[var(--color-text-muted)]">New emails are added as Members.</p>
+        )}
         <button
           type="submit"
           disabled={isPending}
@@ -96,23 +108,30 @@ export function AllowedEmailsTable({ emails }: { emails: AllowedEmail[] }) {
               <tr key={e.id} className="border-b border-[var(--color-border)] last:border-0">
                 <td className="px-5 py-3 text-[var(--color-text)]">{e.email}</td>
                 <td className="px-5 py-3">
-                  <select
-                    value={e.role}
-                    onChange={(ev) => handleRoleChange(e.id, ev.target.value as 'member' | 'admin')}
-                    style={{ colorScheme: 'dark' }}
-                    className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1 text-xs text-[var(--color-text)]"
-                        >
-                    <option value="member">Member</option>
-                    <option value="admin">Admin</option>
-                  </select>
+                  {isSuperAdmin ? (
+                    <select
+                      value={e.role}
+                      onChange={(ev) => handleRoleChange(e.id, ev.target.value as ProfileRole)}
+                      style={{ colorScheme: 'dark' }}
+                      className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1 text-xs text-[var(--color-text)]"
+                    >
+                      <option value="member">Member</option>
+                      <option value="admin">Admin</option>
+                      <option value="super_admin">Super Admin</option>
+                    </select>
+                  ) : (
+                    <span className="text-xs text-[var(--color-text-muted)]">{ROLE_LABELS[e.role]}</span>
+                  )}
                 </td>
                 <td className="px-5 py-3 text-right">
-                  <button
-                    onClick={() => handleRemove(e.id, e.email)}
-                    className="text-xs text-red-400 hover:underline"
-                  >
-                    Remove
-                  </button>
+                  {isSuperAdmin && (
+                    <button
+                      onClick={() => handleRemove(e.id, e.email)}
+                      className="text-xs text-red-400 hover:underline"
+                    >
+                      Remove
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}

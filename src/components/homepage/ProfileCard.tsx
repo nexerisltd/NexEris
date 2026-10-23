@@ -6,7 +6,7 @@ import { motion } from 'framer-motion'
 import { CheckCircle2 } from 'lucide-react'
 import type { PublicProfile } from '@/lib/data/profiles'
 
-const MotionLink = motion(Link)
+const MotionLink = motion.create(Link)
 
 export function ProfileCard({
   profile,
@@ -39,6 +39,7 @@ export function ProfileCard({
               src={profile.avatar_url}
               alt={profile.full_name}
               fill
+              sizes="56px"
               className="object-cover"
             />
           ) : (

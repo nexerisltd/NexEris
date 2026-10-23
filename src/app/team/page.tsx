@@ -2,7 +2,7 @@ import { TeamSection } from '@/components/homepage/TeamSection'
 import { getAllProfiles } from '@/lib/data/profiles'
 
 export const metadata = {
-  title: 'Team — NexEris',
+  title: 'Team — NexEris LTD',
   description: 'Browse every member of the NexEris team.',
 }
 

@@ -37,6 +37,7 @@ export async function middleware(request: NextRequest) {
   const needsAuth =
     path.startsWith(PROTECTED_ADMIN_PREFIX) ||
     path.startsWith(PROTECTED_DASHBOARD_PREFIX) ||
+    path === '/products/new' ||
     path.endsWith('/edit')
 
   if (needsAuth && !user) {
@@ -52,6 +53,6 @@ export const config = {
   matcher: [
     '/dashboard/:path*',
     '/admin/:path*',
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api/v1|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

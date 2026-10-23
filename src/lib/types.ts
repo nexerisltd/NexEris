@@ -17,7 +17,7 @@ export interface Profile {
   whatsapp: string | null
   facebook: string | null
   instagram: string | null
-  role: 'member' | 'admin'
+  role: 'member' | 'admin' | 'super_admin'
   exp_points: number
   created_at: string
   updated_at: string

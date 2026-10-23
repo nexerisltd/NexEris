@@ -8,7 +8,7 @@ export function TeamTeaser({ profiles }: { profiles: PublicProfile[] }) {
   const preview = profiles.slice(0, 3)
 
   return (
-    <section className="px-6 py-20">
+    <section id="team" className="scroll-mt-20 px-6 py-20">
       <div className="mx-auto max-w-6xl">
         <Reveal className="flex flex-col items-center gap-3 text-center">
           <span className="font-[family-name:var(--font-data)] text-xs uppercase tracking-[0.2em] text-[var(--color-accent-bright)]">

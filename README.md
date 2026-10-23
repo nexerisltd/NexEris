@@ -33,6 +33,23 @@ bun dev
 
 - This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Deployment & configuration
+
+Live site: <https://nexeris.vercel.app>
+
+Copy `.env.example` to `.env.local` and fill it in (Supabase URL, anon key, service-role key, and
+`NEXT_PUBLIC_SITE_URL`). The same variables go into the Vercel project settings.
+
+## Database
+
+SQL lives in [`supabase/`](supabase/README.md): `schema.sql` for a new project and
+`migrations/` for incremental changes.
+
+## Public API
+
+Super Admins create API keys in the admin panel (`/admin/api-keys`). Anyone holding a key can read
+team and product data — see the guide at <https://nexeris.vercel.app/docs/api>.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

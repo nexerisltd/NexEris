@@ -51,6 +51,7 @@ export function CoverPositionEditor({
         src={imageUrl}
         alt="Cover"
         fill
+        sizes="(max-width: 1024px) 100vw, 1024px"
         className="pointer-events-none object-cover"
         style={{ objectPosition: `center ${position}%` }}
         draggable={false}

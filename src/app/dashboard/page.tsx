@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { ProfileEditForm } from '@/components/profile/ProfileEditForm'
+import { isStaff, isSuperAdmin } from '@/lib/roles'
 
 export default async function DashboardPage() {
   const currentUser = await getCurrentUser()
@@ -38,7 +39,11 @@ export default async function DashboardPage() {
         </p>
 
         <div className="glass mt-8 rounded-2xl p-6 sm:p-8">
-          <ProfileEditForm profile={profile} isAdmin={currentUser.role === 'admin'} />
+          <ProfileEditForm
+            profile={profile}
+            canManage={isSuperAdmin(currentUser.role)}
+            canAdjustExp={isStaff(currentUser.role)}
+          />
         </div>
       </div>
     </main>

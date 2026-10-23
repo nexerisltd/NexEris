@@ -26,3 +26,19 @@ export async function getAllProfiles(): Promise<PublicProfile[]> {
 
   return data ?? []
 }
+
+export async function getProfilesByUsernames(usernames: string[]): Promise<PublicProfile[]> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, username, full_name, position, department, bio, nex_id, avatar_url')
+    .in('username', usernames)
+
+  if (error) {
+    console.error('Failed to load profiles by username:', error)
+    return []
+  }
+
+  return data ?? []
+}

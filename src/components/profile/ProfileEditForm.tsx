@@ -10,7 +10,17 @@ import { CoverPositionEditor } from './CoverPositionEditor'
 import { Toast } from '@/components/ui/Toast'
 import type { Profile } from '@/lib/types'
 
-export function ProfileEditForm({ profile, isAdmin }: { profile: Profile; isAdmin: boolean }) {
+export function ProfileEditForm({
+  profile,
+  canManage,
+  canAdjustExp,
+}: {
+  profile: Profile
+  /** Super Admin: may change position & department. */
+  canManage: boolean
+  /** Admin or Super Admin: may add / remove EXP. */
+  canAdjustExp: boolean
+}) {
   const [form, setForm] = useState({
     full_name: profile.full_name ?? '',
     username: profile.username ?? '',
@@ -178,7 +188,7 @@ export function ProfileEditForm({ profile, isAdmin }: { profile: Profile; isAdmi
           <p className="mb-2 text-xs text-[var(--color-text-muted)]">Profile picture</p>
           <div className="relative h-20 w-20 overflow-hidden rounded-full ring-2 ring-[var(--color-accent)]/50">
             {form.avatar_url ? (
-              <Image src={form.avatar_url} alt="Avatar" fill className="object-cover" />
+              <Image src={form.avatar_url} alt="Avatar" fill sizes="80px" className="object-cover" />
             ) : (
               <div className="h-full w-full bg-[var(--color-surface-hover)]" />
             )}
@@ -254,7 +264,7 @@ export function ProfileEditForm({ profile, isAdmin }: { profile: Profile; isAdmi
           </p>
         </div>
 
-        {isAdmin && (
+        {canAdjustExp && (
           <div>
             <label className="mb-1.5 block text-xs text-[var(--color-text-muted)]">
               EXP Points (admin only)
@@ -305,20 +315,20 @@ export function ProfileEditForm({ profile, isAdmin }: { profile: Profile; isAdmi
             />
           </Field>
           <div />
-          <Field label="Position" hint={!isAdmin ? 'Only admins can change this' : undefined}>
+          <Field label="Position" hint={!canManage ? 'Only a Super Admin can change this' : undefined}>
             <input
               value={form.position}
               onChange={(e) => handleChange('position', e.target.value)}
               className="input disabled:opacity-50"
-              disabled={!isAdmin}
+              disabled={!canManage}
             />
           </Field>
-          <Field label="Department" hint={!isAdmin ? 'Only admins can change this' : undefined}>
+          <Field label="Department" hint={!canManage ? 'Only a Super Admin can change this' : undefined}>
             <input
               value={form.department}
               onChange={(e) => handleChange('department', e.target.value)}
               className="input disabled:opacity-50"
-              disabled={!isAdmin}
+              disabled={!canManage}
             />
           </Field>
         </div>

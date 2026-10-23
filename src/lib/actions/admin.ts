@@ -1,20 +1,35 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { getCurrentUser } from '@/lib/auth'
+import { isStaff, isSuperAdmin, type ProfileRole } from '@/lib/roles'
 import { revalidatePath } from 'next/cache'
 
-async function requireAdmin() {
+const VALID_ROLES: ProfileRole[] = ['member', 'admin', 'super_admin']
+
+// Authorization is enforced here, in code. Writes then go through the service
+// client so they work regardless of which roles the database RLS policies know.
+async function requireStaff() {
   const currentUser = await getCurrentUser()
-  if (currentUser.role !== 'admin') {
-    throw new Error('Not authorized.')
-  }
+  if (!isStaff(currentUser.role)) throw new Error('Not authorized.')
   return currentUser
 }
 
-export async function addAllowedEmail(email: string, role: 'member' | 'admin') {
-  await requireAdmin()
-  const supabase = await createClient()
+async function requireSuperAdmin() {
+  const currentUser = await getCurrentUser()
+  if (!isSuperAdmin(currentUser.role)) throw new Error('Only a Super Admin can do this.')
+  return currentUser
+}
+
+export async function addAllowedEmail(email: string, role: ProfileRole) {
+  const currentUser = await requireStaff()
+  if (!VALID_ROLES.includes(role)) return { success: false, error: 'Invalid role.' }
+  // Admins can only add plain members.
+  if (role !== 'member' && !isSuperAdmin(currentUser.role)) {
+    return { success: false, error: 'Only a Super Admin can add admins or super admins.' }
+  }
+
+  const supabase = createServiceClient()
   const { error } = await supabase
     .from('allowed_members')
     .insert({ email: email.toLowerCase().trim(), role })
@@ -25,26 +40,31 @@ export async function addAllowedEmail(email: string, role: 'member' | 'admin') {
 }
 
 export async function removeAllowedEmail(id: string) {
-  await requireAdmin()
-  const supabase = await createClient()
+  await requireSuperAdmin()
+  const supabase = createServiceClient()
   const { error } = await supabase.from('allowed_members').delete().eq('id', id)
   if (error) return { success: false, error: error.message }
   revalidatePath('/admin/allowed-emails')
   return { success: true }
 }
 
-export async function updateAllowedEmailRole(id: string, role: 'member' | 'admin') {
-  await requireAdmin()
-  const supabase = await createClient()
+export async function updateAllowedEmailRole(id: string, role: ProfileRole) {
+  await requireSuperAdmin()
+  if (!VALID_ROLES.includes(role)) return { success: false, error: 'Invalid role.' }
+  const supabase = createServiceClient()
   const { error } = await supabase.from('allowed_members').update({ role }).eq('id', id)
   if (error) return { success: false, error: error.message }
   revalidatePath('/admin/allowed-emails')
   return { success: true }
 }
 
-export async function changeProfileRole(profileId: string, role: 'member' | 'admin') {
-  await requireAdmin()
-  const supabase = await createClient()
+export async function changeProfileRole(profileId: string, role: ProfileRole) {
+  const currentUser = await requireSuperAdmin()
+  if (!VALID_ROLES.includes(role)) return { success: false, error: 'Invalid role.' }
+  if (currentUser.profile?.id === profileId) {
+    return { success: false, error: "You can't change your own role." }
+  }
+  const supabase = createServiceClient()
   const { error } = await supabase.from('profiles').update({ role }).eq('id', profileId)
   if (error) return { success: false, error: error.message }
   revalidatePath('/admin/members')
@@ -52,13 +72,13 @@ export async function changeProfileRole(profileId: string, role: 'member' | 'adm
 }
 
 export async function adjustExpPoints(profileId: string, delta: number, username: string) {
-  await requireAdmin()
+  await requireStaff()
 
   if (!Number.isFinite(delta) || delta === 0) {
     return { success: false, error: 'Enter a non-zero amount.' }
   }
 
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { data: existing, error: fetchError } = await supabase
     .from('profiles')
@@ -87,8 +107,11 @@ export async function adjustExpPoints(profileId: string, delta: number, username
 }
 
 export async function deleteProfile(profileId: string) {
-  await requireAdmin()
-  const supabase = await createClient()
+  const currentUser = await requireSuperAdmin()
+  if (currentUser.profile?.id === profileId) {
+    return { success: false, error: "You can't delete your own profile." }
+  }
+  const supabase = createServiceClient()
   const { error } = await supabase.from('profiles').delete().eq('id', profileId)
   if (error) return { success: false, error: error.message }
   revalidatePath('/admin/members')
@@ -97,10 +120,11 @@ export async function deleteProfile(profileId: string) {
 }
 
 export async function bulkAddAllowedEmails(
-  entries: { email: string; role: 'member' | 'admin' }[]
+  entries: { email: string; role: ProfileRole }[]
 ) {
-  await requireAdmin()
-  const supabase = await createClient()
+  const currentUser = await requireStaff()
+  const canAssignRoles = isSuperAdmin(currentUser.role)
+  const supabase = createServiceClient()
 
   let added = 0
   let skipped = 0
@@ -113,13 +137,14 @@ export async function bulkAddAllowedEmails(
       continue
     }
 
-    const { error } = await supabase
-      .from('allowed_members')
-      .insert({ email, role: entry.role })
+    // Admins can only import plain members; any other role is coerced.
+    const role: ProfileRole =
+      canAssignRoles && VALID_ROLES.includes(entry.role) ? entry.role : 'member'
+
+    const { error } = await supabase.from('allowed_members').insert({ email, role })
 
     if (error) {
       if (error.code === '23505') {
-        // unique constraint violation — email already exists
         skipped++
       } else {
         errors.push(`${email}: ${error.message}`)

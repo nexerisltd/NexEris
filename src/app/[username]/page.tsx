@@ -8,6 +8,7 @@ import { whatsappUrl, facebookUrl, instagramUrl } from '@/lib/social-links'
 import { LikeButton } from '@/components/profile/LikeButton'
 import { AvatarLightbox } from '@/components/profile/AvatarLightbox'
 import { ExpBar } from '@/components/profile/ExpBar'
+import { isStaff, isSuperAdmin } from '@/lib/roles'
 
 export async function generateMetadata({
   params,
@@ -93,8 +94,10 @@ export default async function ProfilePage({
     initialLiked = !!likeRow
   }
 
-  const isOwnerOrAdmin =
-    currentUser.authUserId === profile.auth_user_id || currentUser.role === 'admin'
+  const isOwner = currentUser.authUserId === profile.auth_user_id
+  const canEditProfile = isOwner || isSuperAdmin(currentUser.role)
+  // Admins (non-owner) only get an EXP-adjust page.
+  const canAdjustExpOnly = !canEditProfile && isStaff(currentUser.role)
 
   const initials = profile.full_name
     .split(' ')
@@ -111,6 +114,8 @@ export default async function ProfilePage({
             src={profile.cover_url}
             alt=""
             fill
+            sizes="100vw"
+            priority
             className="object-cover"
             style={{ objectPosition: `center ${profile.cover_position ?? 50}%` }}
           />
@@ -129,6 +134,7 @@ export default async function ProfilePage({
                   src={profile.avatar_url}
                   alt={profile.full_name}
                   fill
+                  sizes="128px"
                   className="object-cover"
                 />
               ) : (
@@ -139,13 +145,13 @@ export default async function ProfilePage({
             </div>
           </AvatarLightbox>
 
-          {isOwnerOrAdmin && (
+          {(canEditProfile || canAdjustExpOnly) && (
             <Link
               href={`/${profile.username}/edit`}
               className="glass mb-2 flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-[var(--color-text)] hover:border-[var(--color-accent)]/40"
             >
               <Pencil className="h-3.5 w-3.5" />
-              Edit profile
+              {canEditProfile ? 'Edit profile' : 'Manage EXP'}
             </Link>
           )}
         </div>

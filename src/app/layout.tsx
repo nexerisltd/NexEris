@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
 import { Sora, Inter, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
-import { Navbar } from '@/components/layout/Navbar'
+import { Suspense } from 'react'
+import { siteUrl } from '@/lib/company'
+import { Navbar, NavbarFallback } from '@/components/layout/Navbar'
 import { ScrollProgress } from '@/components/ui/ScrollProgress'
 import { CustomCursor } from '@/components/ui/CustomCursor'
 import { ThemeScript } from '@/components/ui/ThemeScript'
@@ -25,8 +27,9 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'NexEris Team Directory',
-  description: "Meet the people behind NexEris — verified, current, in one place.",
+  metadataBase: new URL(siteUrl),
+  title: { default: 'NexEris LTD', template: '%s' },
+  description: 'NexEris LTD builds web platforms, desktop apps, browser tools and bots.',
 }
 
 export default function RootLayout({
@@ -35,14 +38,16 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <body
         className={`${sora.variable} ${inter.variable} ${jetbrainsMono.variable} antialiased`}
       >
         <ThemeScript />
         <ScrollProgress />
         <CustomCursor />
-        <Navbar />
+        <Suspense fallback={<NavbarFallback />}>
+          <Navbar />
+        </Suspense>
         {children}
       </body>
     </html>

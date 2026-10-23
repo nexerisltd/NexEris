@@ -3,10 +3,11 @@
 import { useState, useTransition, useRef } from 'react'
 import { Upload } from 'lucide-react'
 import { bulkAddAllowedEmails } from '@/lib/actions/admin'
+import type { ProfileRole } from '@/lib/roles'
 
 interface ParsedEntry {
   email: string
-  role: 'member' | 'admin'
+  role: ProfileRole
 }
 
 function parseCsv(text: string): ParsedEntry[] {
@@ -25,14 +26,15 @@ function parseCsv(text: string): ParsedEntry[] {
     if (email === 'email') continue
     if (!email || !email.includes('@')) continue
 
-    const role = parts[1]?.toLowerCase() === 'admin' ? 'admin' : 'member'
+    const raw = parts[1]?.toLowerCase().replace(/[\s-]/g, '_')
+    const role: ProfileRole = raw === 'super_admin' ? 'super_admin' : raw === 'admin' ? 'admin' : 'member'
     entries.push({ email, role })
   }
 
   return entries
 }
 
-export function BulkImportEmails() {
+export function BulkImportEmails({ canAssignRoles }: { canAssignRoles: boolean }) {
   const [open, setOpen] = useState(false)
   const [text, setText] = useState('')
   const [isPending, startTransition] = useTransition()
@@ -93,6 +95,7 @@ export function BulkImportEmails() {
       <p className="mt-1 text-xs text-[var(--color-text-muted)]">
         Upload a CSV or paste rows below. Format: <code>email,role</code> — role is optional,
         defaults to &quot;member&quot;. Example:
+        {!canAssignRoles && ' Only a Super Admin can assign admin roles — all rows are added as members.'}
       </p>
       <pre className="mt-2 rounded-lg bg-[var(--color-surface-hover)] px-3 py-2 text-xs text-[var(--color-text-muted)]">
 {`email,role

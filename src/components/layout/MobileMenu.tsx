@@ -2,17 +2,29 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { SignOutButton } from '@/components/auth/SignOutButton'
+import { isStaff, isSignedInMember, type UserRole } from '@/lib/roles'
+import { getActiveNav, type NavKey } from '@/lib/nav'
 
 interface MobileMenuProps {
-  role: 'guest' | 'member' | 'admin'
+  role: UserRole
   username?: string
 }
 
 export function MobileMenu({ role, username }: MobileMenuProps) {
   const [open, setOpen] = useState(false)
+  const active = getActiveNav(usePathname(), username)
+
+  // Current page (or the section it belongs to) gets an accent bar and brighter text.
+  const cls = (key: NavKey | null) =>
+    `border-l-2 pl-3 transition-colors ${
+      key && active === key
+        ? 'border-[var(--color-accent-bright)] font-medium text-[var(--color-accent-bright)]'
+        : 'border-transparent text-[var(--color-text)]'
+    }`
 
   return (
     <div className="sm:hidden">
@@ -50,27 +62,36 @@ export function MobileMenu({ role, username }: MobileMenuProps) {
               </button>
 
               <nav className="flex flex-col gap-5 text-sm">
-                <Link href="/" onClick={() => setOpen(false)} className="text-[var(--color-text)]">
+                <Link href="/" onClick={() => setOpen(false)} className={cls('home')}>
                   Home
                 </Link>
-                <Link href="/team" onClick={() => setOpen(false)} className="text-[var(--color-text)]">
+                <Link href="/products" onClick={() => setOpen(false)} className={cls('products')}>
+                  Products
+                </Link>
+                <Link href="/about" onClick={() => setOpen(false)} className={cls('about')}>
+                  About
+                </Link>
+                <Link href="/team" onClick={() => setOpen(false)} className={cls('team')}>
                   Team
+                </Link>
+                <Link href="/#contact" onClick={() => setOpen(false)} className={cls(null)}>
+                  Contact
                 </Link>
 
                 {role === 'guest' && (
-                  <Link href="/login" onClick={() => setOpen(false)} className="text-[var(--color-text)]">
+                  <Link href="/login" onClick={() => setOpen(false)} className={cls('login')}>
                     Sign in
                   </Link>
                 )}
 
-                {(role === 'member' || role === 'admin') && (
+                {isSignedInMember(role) && (
                   <>
-                    <Link href={`/${username}`} onClick={() => setOpen(false)} className="text-[var(--color-text)]">
+                    <Link href={`/${username}`} onClick={() => setOpen(false)} className={cls('profile')}>
                       My Profile
                     </Link>
-                    {role === 'admin' && (
-                      <Link href="/admin" onClick={() => setOpen(false)} className="text-[var(--color-text)]">
-                        Admin
+                    {isStaff(role) && (
+                      <Link href="/admin" onClick={() => setOpen(false)} className={cls('admin')}>
+                        {role === 'super_admin' ? 'Super Admin' : 'Admin'}
                       </Link>
                     )}
                     <div className="pt-2">

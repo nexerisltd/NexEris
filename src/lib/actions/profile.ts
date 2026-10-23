@@ -1,7 +1,9 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { getCurrentUser } from '@/lib/auth'
+import { isSuperAdmin, RESERVED_USERNAMES } from '@/lib/roles'
 import { revalidatePath } from 'next/cache'
 
 export interface ProfileUpdateInput {
@@ -22,6 +24,7 @@ export interface ProfileUpdateInput {
 }
 
 export async function checkUsernameAvailable(username: string, excludeProfileId: string) {
+  if (RESERVED_USERNAMES.includes(username.toLowerCase())) return false
   const supabase = await createClient()
   const { data } = await supabase
     .from('profiles')
@@ -41,13 +44,20 @@ export async function updateProfile(profileId: string, input: ProfileUpdateInput
   }
 
   const isOwner = currentUser.profile.id === profileId
-  const isAdmin = currentUser.role === 'admin'
+  const isSA = isSuperAdmin(currentUser.role)
 
-  if (!isOwner && !isAdmin) {
+  // Members and Admins can only edit their own profile; only a Super Admin can edit anyone's.
+  if (!isOwner && !isSA) {
     return { success: false, error: 'You can only edit your own profile.' }
   }
 
-  const supabase = await createClient()
+  if (RESERVED_USERNAMES.includes(input.username.toLowerCase())) {
+    return { success: false, error: 'That username is reserved.' }
+  }
+
+  // Authorization is checked above; the write uses the service client so it
+  // also works when a Super Admin edits someone else's profile.
+  const supabase = createServiceClient()
 
   const { data: existing } = await supabase
     .from('profiles')
@@ -74,9 +84,9 @@ export async function updateProfile(profileId: string, input: ProfileUpdateInput
     return { success: false, error: 'WhatsApp number is required.' }
   }
 
-  // Position & Department: only admins are allowed to change these.
-  const position = isAdmin ? input.position || null : existing.position
-  const department = isAdmin ? input.department || null : existing.department
+  // Position & Department: only a Super Admin is allowed to change these.
+  const position = isSA ? input.position || null : existing.position
+  const department = isSA ? input.department || null : existing.department
 
   // Nex ID is intentionally NOT touched here — it's set once at account
   // creation (see app/auth/callback/route.ts) and stays fixed for the

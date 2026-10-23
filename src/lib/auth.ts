@@ -1,6 +1,9 @@
+import { cache } from 'react'
 import { createClient } from '@/lib/supabase/server'
 
-export type UserRole = 'guest' | 'member' | 'admin'
+import type { UserRole, ProfileRole } from '@/lib/roles'
+
+export type { UserRole }
 
 export interface CurrentUser {
   role: UserRole
@@ -9,11 +12,12 @@ export interface CurrentUser {
     id: string
     username: string
     full_name: string
-    role: 'member' | 'admin'
+    role: ProfileRole
   } | null
 }
 
-export async function getCurrentUser(): Promise<CurrentUser> {
+// cache(): Navbar, page and footer all ask for the user; this makes it one lookup per request.
+export const getCurrentUser = cache(async (): Promise<CurrentUser> => {
   const supabase = await createClient()
 
   const {
@@ -39,4 +43,4 @@ export async function getCurrentUser(): Promise<CurrentUser> {
     authUserId: user.id,
     profile,
   }
-}
+})
